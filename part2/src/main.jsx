@@ -1,11 +1,11 @@
 import React from "react";
 import ReactDOM from 'react-dom/client'
 
-// courseinfo exercise 2.1-1.5
-import App from '../courseinfo/src/App.jsx'
+// courseinfo exercise 2.1-2.5
+//import App from '../courseinfo/src/App.jsx'
 
-//unicafe exercise 1.6-1.11
-// import App from'../unicafe/App.jsx'
+//unicafe exercise 2.6-2.10
+import App from '../phonebook/src/App.jsx'
 
 // anecdotes exercise 1.12-1.14
 // import App from'../anecdotes/App.jsx'
