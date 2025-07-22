@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from 'react-dom/client'
+import '../phonebook/src/index.css'
 
 // courseinfo exercise 2.1-2.5
 //import App from '../courseinfo/src/App.jsx'
