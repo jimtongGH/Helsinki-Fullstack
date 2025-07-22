@@ -1,18 +1,63 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import personService from './services/persons'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 
 const App = () => {
-    const [persons, setPersons] = useState([
-        { name: 'Arto Hellas', number: '040-123456', id: 1 },
-        { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-        { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-        { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-    ])
+    const [persons, setPersons] = useState([])
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [filter, setFilter] = useState('')
+
+    useEffect(() => {
+        personService
+            .getAll()
+            .then(initialPersons => {
+                setPersons(initialPersons)
+            })
+    }, [])
+
+    const addPerson = (event) => {
+        event.preventDefault()
+
+        const existingPerson = persons.find(person => person.name === newName)
+
+        if (existingPerson) {
+            if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+                const changedPerson = { ...existingPerson, number: newNumber }
+                personService
+                    .update(existingPerson.id, changedPerson)
+                    .then(returnedPerson => {
+                        setPersons(persons.map(person =>
+                            person.id !== existingPerson.id ? person : returnedPerson
+                        ))
+                        setNewName('')
+                        setNewNumber('')
+                    })
+            }
+        } else {
+            const personObject = { name: newName, number: newNumber }
+            personService
+                .create(personObject)
+                .then(returnPerson => {
+                    setPersons(persons.concat(returnPerson))
+                    setNewName('')
+                    setNewNumber('')
+                })
+        }
+    }
+
+    const deletePerson = (id, name) => {
+        console.log('deleting', id, name)
+        if (window.confirm(`Delete ${name} ?`)) {
+            personService
+                .remove(id)
+                .then(() => {
+                    setPersons(persons.filter(person => person.id !== id))
+                })
+        }
+    }
 
     const handleNameChange = (event) => setNewName(event.target.value)
 
@@ -23,17 +68,17 @@ const App = () => {
     const handleFilterChange = (event) => setFilter(event.target.value)
 
 
-    const handleSubmit = (event) => {
-        event.preventDefault() // Prevent the default form submission behavior
-        // exercise 2.7
-        if (persons.some(person => person.name === newName)) {
-            alert(`${newName} is already added to phonebook`)
-            return
-        }
-        setPersons(persons.concat({ name: newName, number: newNumber })) // Add the new name to the persons array
-        setNewName('') // Clear the input field after submission
-        setNewNumber('')
-    }
+    // const handleSubmit = (event) => {
+    //     event.preventDefault() // Prevent the default form submission behavior
+    //     // exercise 2.7
+    //     if (persons.some(person => person.name === newName)) {
+    //         alert(`${newName} is already added to phonebook`)
+    //         return
+    //     }
+    //     setPersons(persons.concat({ name: newName, number: newNumber })) // Add the new name to the persons array
+    //     setNewName('') // Clear the input field after submission
+    //     setNewNumber('')
+    // }
 
     // exercise 2.9
     const personsToShow = persons.filter(person =>
@@ -64,7 +109,7 @@ const App = () => {
 
             {/* exercise 2.10 */}
             <PersonForm
-                onSubmit={handleSubmit}
+                onSubmit={addPerson}
                 newName={newName}
                 handleNameChange={handleNameChange}
                 newNumber={newNumber}
@@ -78,7 +123,8 @@ const App = () => {
             {/*</div>*/}
 
             {/*exercise 2.10*/}
-            <Persons persons={persons} handleNameChange={handleNameChange} />
+            {/*<Persons persons={persons} handleNameChange={handleNameChange} />*/}
+            <Persons persons={personsToShow} deletePerson={deletePerson} />
             <div>debug: {newName} {newNumber}</div>
         </div>
     )
